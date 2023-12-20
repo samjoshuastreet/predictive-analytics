@@ -1,0 +1,162 @@
+{% extends "dashboard/base.html" %}
+{% block title %} Heart Attack Dataset {% endblock %}
+{% block content %}
+<div class="div main-panel">
+    <div class="content-wrapper">
+        <div class="row">
+          <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">{{ dataset.filename }}</h4>
+                <a href="#create_vis"><button class="btn btn-sm btn-warning">Create a Visualization</button></a>
+                <a href="{% url 'delete_dataset' dataset.id %}"><button class="btn btn-sm btn-danger ms-1">Delete Dataset</button></a>
+                <div class="pagination d-flex justify-content-around mt-3 mb-3">
+                    <span class="step-links">
+                        {% if data.has_previous %}
+                            <a class="btn btn-primary" href="?page=1">First</a>
+                            <a class="btn btn-primary" href="?page={{ data.previous_page_number }}">Previous</a>
+                        {% endif %}
+                
+                        <span class="current btn btn-outline-primary disabled">
+                            Page {{ data.number }} of {{ data.paginator.num_pages }}.
+                        </span>
+                
+                        {% if data.has_next %}
+                            <a class="btn btn-primary" href="?page={{ data.next_page_number }}">Next</a>
+                            <a class="btn btn-primary" href="?page={{ data.paginator.num_pages }}">Last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        {% for column in header %}
+                        <th>{{ column|upper  }}</th>
+                        {% endfor %}
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            {% for value in row %}
+                            <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                <div class="pagination d-flex justify-content-around mt-3 mb-3">
+                    <span class="step-links">
+                        {% if data.has_previous %}
+                            <a class="btn btn-primary" href="?page=1">First</a>
+                            <a class="btn btn-primary" href="?page={{ data.previous_page_number }}">Previous</a>
+                        {% endif %}
+                
+                        <span class="current btn btn-outline-primary disabled">
+                            Page {{ data.number }} of {{ data.paginator.num_pages }}.
+                        </span>
+                
+                        {% if data.has_next %}
+                            <a class="btn btn-primary" href="?page={{ data.next_page_number }}">Next</a>
+                            <a class="btn btn-primary" href="?page={{ data.paginator.num_pages }}">Last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <div id="create_vis">
+                  <h3>✨ Create a <span class="text-warning">Visualization</span>! ✨</h3>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Visualization Type</th>
+                        <th>Chart Title</th>
+                        <th>Target Dataset</th>
+                        <th>Target Column</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <form method="POST">
+                      {% csrf_token %}
+                      <tbody>
+                          <tr>
+                            <td>
+                              <select class="form-select" id="visualization_type" name="visualization_type" aria-label="Default select example" onchange="updateTargetColumnOne()">
+                                {% if dataset.dataset_type == 'Classification' %}
+                                  <option value="1">Histogram</option>  
+                                  <option value="2">Bar Chart</option>
+                                {% else %}
+                                  <option value="3">Scatter Plot</option>  
+                                  <option value="4">Violin Plot</option>
+                                {% endif %}
+                              </select>
+                            </td>
+                            <td><input class="form-control" type="text" id="title" name="title"></td>
+                            <td>
+                              <select class="form-select" id="dataset" name="dataset" aria-label="Default select example">
+                                <option value="{{ dataset.id }}" selected>{{ dataset.filename }}</option>  
+                              </select>
+                            </td>
+                            <td>
+                              {% if dataset.dataset_type == 'Regression' %}
+                                <select class="form-select" id="target_column_one" name="target_column_one" aria-label="Default select example">
+                                  {% for column in header %}
+                                  <option value="{{ column }}">{{ column }}</option>  
+                                  {% endfor %}
+                                </select>
+                                <h6 class="card-description fw-bold text-small text-center">x-axis</h6>
+                                <select class="form-select" id="target_column_two" name="target_column_two" aria-label="Default select example">
+                                  {% for column in header %}
+                                  <option value="{{ column }}">{{ column }}</option>  
+                                  {% endfor %}
+                                </select>
+                                <h6 class="card-description fw-bold text-small text-center">y-axis</h6>
+                              {% else %}
+                              <select class="form-select" id="target_column" name="target_column" aria-label="Default select example">
+                                {% for column in header %}
+                                <option value="{{ column }}">{{ column }}</option>  
+                                {% endfor %}
+                              </select>
+                              {% endif %}
+                            </td>
+                            <td><button type="submit" class="btn btn-sm btn-outline-warning">Create</button></td>
+                          </tr>
+                      </tbody>
+                    </form>
+                  </table>    
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock %}
+{% block scripts %}
+<script>
+  function updateTargetColumnOne() {
+    var visualizationTypeSelect = document.getElementById('visualization_type');
+    var targetColumnOneSelect = document.getElementById('target_column_two');
+
+    // Check if the selected visualization type is Violin Plot (value '4')
+    if (visualizationTypeSelect.value === '4') {
+      // Automatically select the first option and disable the select
+      targetColumnOneSelect.value = targetColumnOneSelect.options[0].value;
+      targetColumnOneSelect.disabled = true;
+    } else {
+      // Enable the select if the visualization type is not Violin Plot
+      targetColumnOneSelect.disabled = false;
+    }
+  }
+</script>
+{% endblock %}

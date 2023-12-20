@@ -1,0 +1,65 @@
+{% extends "landing/base.html" %}
+{% block title %} Login {% endblock %}
+{% block content %}
+{% if request.user.is_authenticated %} 
+        
+  <script>
+    window.location.href = "/";
+  </script>
+
+  {% else %}
+
+  <!-- CONTINUE -->
+
+  {% endif %}
+
+  <section>
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        {% for msg in messages %}
+
+        <div class="alert alert-danger d-flex justify-content-between align-items-center messageClass" style="display: inline;" role="alert">
+          {{ msg }}
+        </div>
+      
+        {% endfor %}
+        <div class="card shadow-2-strong" style="border-radius: 1rem;">
+          <div class="card-body p-5 text-center">
+
+            <form action="" method="POST" class="login">
+              {% csrf_token %}
+              <h3 class="mb-5">Sign in</h3>
+
+              <div class="form-outline mb-4">
+                <input type="text" id="username" name="username" class="form-control form-control-lg" />
+                <label class="form-label" for="username">Username</label>
+              </div>
+
+              <div class="form-outline mb-4">
+                <input type="password" id="pass" name="pass" class="form-control form-control-lg" />
+                <label class="form-label" for="pass">Password</label>
+              </div>
+
+              <!-- Checkbox -->
+              <div class="form-check d-flex justify-content-start mb-4">
+                <input class="form-check-input" type="checkbox" value="" id="remember_token" />
+                <label class="form-check-label ms-2" for="remember_token"> Remember password </label>
+              </div>
+
+              <button class="btn btn-primary btn-lg btn-block" type="submit">Login</button>
+
+              <hr class="my-4">
+
+              <p class="text-center text-muted mt-5 mb-0">
+                Don't have an account?
+                <a href="register" class="fw-bold text-body"><u>Register here</u></a>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

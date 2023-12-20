@@ -1,0 +1,125 @@
+{% extends "dashboard/base.html" %}
+{% block title %} Model Viewer {% endblock %}
+{% block content %}
+<div class="div main-panel">
+    <div class="content-wrapper">
+        <div class="row">
+          <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">{{ target.filename }}</h4>
+                <!-- <a href="{# {% url 'delete_dataset' dataset.id %} #}"><button class="btn btn-sm btn-danger ms-1">Delete Dataset</button></a> -->
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th colspan="2" class="text-center">Model Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold text-center">Model Name</td>
+                            <td class="text-center">{{ target.filename }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-center">Model Type</td>
+                            <td class="text-center">{{ target.model_type }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-center">Dataset Name</td>
+                            <td class="text-center">{{ target_dataset.filename }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-center">Resampling Technique Used</td>
+                            <td class="text-center">{{ resampling }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-center">Machine Learning Algorithm Used</td>
+                            <td class="text-center">{{ algorithm }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-center">Performance Metrics Used</td>
+                            <td class="text-center">{{ metric }}</td>
+                        </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="div col-12 mt-5 text-center"><a href="{% url 'delete_model' target.id %}"><button class="btn btn-sm mb-3 ms-3 btn-danger">Delete Trained Model</button></a></div>
+                
+              </div>
+              
+            </div>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3 grid-margin stretch-card"></div>
+          <div class="col-lg-6 grid-margin stretch-card">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="card">
+                <div class="card-body">
+                    <div id="create_vis">
+                    <h3 class="text-center">✨ Predict <span class="text-info">Values</span>! ✨</h3>
+                    </div>
+                    <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th class="text-center">Column</th>
+                            <th class="text-center">Value</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in header %}
+                            <tr>    
+                                {% if forloop.counter == column_length %}
+                                {% else %}
+                                <td class="fw-bold">{{ row.title }}</td>
+                                <td><input class="form-control form-control-sm" name="{{ row }}" type="number" step="any" placeholder="{{ row }}"></td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <th colspan="2" class="text-center"><button type="submit" class="btn btn-sm btn-outline-warning">Predict</button></th>
+                            </tr>
+                        </tbody>
+                    </table>    
+                    </div>
+                </div>
+                </div>
+            </form>
+          </div>
+          <div class="col-lg-3 grid-margin stretch-card"></div>
+          
+        </div>
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="text-center">Results</h3>
+                        <h5 class="text-center">Result: {{ results }}<span class="text-decoration-underline">{{ result }}</span></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+      </div>
+{% endblock %}
+{% block scripts %}
+<script>
+  function updateTargetColumnOne() {
+    var visualizationTypeSelect = document.getElementById('visualization_type');
+    var targetColumnOneSelect = document.getElementById('target_column_two');
+
+    // Check if the selected visualization type is Violin Plot (value '4')
+    if (visualizationTypeSelect.value === '4') {
+      // Automatically select the first option and disable the select
+      targetColumnOneSelect.value = targetColumnOneSelect.options[0].value;
+      targetColumnOneSelect.disabled = true;
+    } else {
+      // Enable the select if the visualization type is not Violin Plot
+      targetColumnOneSelect.disabled = false;
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends "dashboard/base.html" %}
+{% block title %} Model Trainer {% endblock %}
+{% block content %}
+{% load static %}
+<div class="main-panel">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="content-wrapper">
+            <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div>   
+                            <ul>   
+                          {% for message in messages %}
+                            
+                            <li><span class="text-success">{{ message }}</span></li>
+                            
+                          {% endfor %}
+                           </ul>
+                          </div>
+                    <h2>Train and Save a Model</h2>
+                    <p class="card-description">
+                        The system is currently only supporting a <span class="fw-bold text-warning">limited</span> number of resampling and training choices.
+                    </p>
+                    <div class="table-responsive">
+                        <table class="table table-hover mt-3">
+                        <thead>
+                            <tr>
+                            <th colspan="5" class="text-center fw-bold"><h4>Select a <span class="text-danger fw-bold">Model</span>.</h4></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                            <td class="fw-bold text-center">Model Selection</td>
+                            <td class="fw-bold text-center">Resampling Technique</td>
+                            <td class="fw-bold text-center">Machine Learning Algorithm</td>
+                            <td class="fw-bold text-center">Performance Metrics</td>
+                            <td class="fw-bold text-center">Action</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <select class="form-select" id="target_dataset" name="target_dataset" aria-label="Default select example" onchange="">
+                                        {% for dataset in datasets %}
+                                            <option value="{{ dataset.id }}" dataset-type="{{ dataset.dataset_type }}">{{ dataset.filename }} ({{ dataset.dataset_type }})</option>  
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-select" id="resampling_technique" name="resampling_technique" aria-label="Default select example" onchange="">
+                                        <option value="1">Split into train and test sets</option>  
+                                        <option value="2">K-fold Cross Validation</option>  
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-select" id="ml_algorithm" name="ml_algorithm" aria-label="Default select example" onchange="">
+                                        <option value="1">Classification and Regression Trees (CART)</option>  
+                                        <option value="2">Random Forest</option>  
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-select" id="performance_metric" name="performance_metric" aria-label="Default select example" onchange="">
+                                        <option value="1" dataset-type="Classification">Classification Accuracy</option>  
+                                        <option value="2" dataset-type="Regression">R-squared</option>  
+                                    </select>
+                                </td>
+                                <td><button type="submit" class="btn btn-outline-danger">Train</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" id="test_size" name="test_size" placeholder="Test Size">
+                                    <label for="test_size" class="text-sm card-description mt-1">Test size (Default: 0.20)</label>
+                                    <input type="number" class="form-control" id="folds" name="folds" placeholder="Number of Folds">
+                                    <label for="test_size" class="text-sm card-description mt-1">Number of Folds (Default: 5)</label>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" id="max_depth" name="max_depth" placeholder="Max Depth">
+                                    <label for="test_size" class="text-sm card-description mt-1">Max depth (Default: 0)</label>
+                                </td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="table table-hover mt-3">
+                        <thead>
+                            <tr>
+                            <th colspan="6" class="text-center fw-bold"><h3>Training <span class="text-primary fw-bold">Results</span></h3></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold text-center">Model Selection</td>
+                                <td class="fw-bold text-center">Resampling Technique</td>
+                                <td class="fw-bold text-center">Machine Learning Algorithm</td>
+                                <td class="fw-bold text-center">Performance Metrics</td>
+                                <td class="fw-bold text-center">Accuracy</td>
+                                <td class="fw-bold text-center">Actions</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">
+                                    {{ selected_model.filename }}
+                                </td>
+                                <td class="text-center">
+                                    {{ resampling_technique }}
+                                </td>
+                                <td class="text-center">
+                                    {{ machine_learning }}
+                                </td>
+                                <td class="text-center">
+                                    {{ performance_metrics }}
+                                </td>
+                                <td class="fw-bold text-primary text-center">
+                                    {% if resampling_technique_id == '1' %}
+                                        {{ results.result }}
+                                    {% else %}
+                                        {% for result in results.result %}
+                                            {% if forloop.counter != results.result|length %}
+                                                {{ result }}<br>
+                                            {% else %}
+                                                {{ result }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if results %}
+                                    <a href="{% url 'delete_model' model.id %}"><button type="button" class="btn btn-sm btn-outline-danger">Delete</button></a><br>
+                                    <a href="model_trainer"><button type="button" class="btn btn-sm btn-outline-primary mt-1">Re-train</button></a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!-- content-wrapper ends -->
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide all options initially
+        var performanceMetricOptions = document.querySelectorAll('#performance_metric option');
+        performanceMetricOptions.forEach(function(option) {
+            option.style.display = 'none';
+        });
+    
+        // Show/hide options based on the selected target_dataset
+        var targetDatasetSelect = document.getElementById('target_dataset');
+        var performanceMetricSelect = document.getElementById('performance_metric');
+    
+        targetDatasetSelect.addEventListener('change', function() {
+            var selectedType = targetDatasetSelect.options[targetDatasetSelect.selectedIndex].getAttribute('dataset-type');
+    
+            // Hide all options
+            performanceMetricOptions.forEach(function(option) {
+                option.style.display = 'none';
+            });
+    
+            // Show options based on the selected dataset-type
+            var filteredOptions = document.querySelectorAll('#performance_metric option[dataset-type="' + selectedType + '"]');
+            filteredOptions.forEach(function(option) {
+                option.style.display = 'block';
+            });
+    
+            // Select the first option in performance_metric with the corresponding dataset-type
+            var firstOption = performanceMetricSelect.querySelector('option[dataset-type="' + selectedType + '"]');
+            if (firstOption) {
+                firstOption.selected = true;
+            }
+        });
+    
+        // Trigger the change event initially to consider the initial selection
+        var initialChangeEvent = new Event('change');
+        targetDatasetSelect.dispatchEvent(initialChangeEvent);
+    });
+</script>
+{% endblock %}
